@@ -119,14 +119,14 @@ func TestNewMerkleTree(t *testing.T) {
 	tree, err := NewMerkeTree(sha3.NewLegacyKeccak256(), leaves)
 	require.NoError(t, err)
 
-	proof, err := getProofByIndex(tree, 3)
+	proof, err := GetProofByIndex(tree, 3)
 	require.NoError(t, err)
 
-	root, err := processProof(tree, tree.Nodes[3], proof)
+	root, err := ProcessProof(tree, tree.Nodes[3], proof)
 	require.NoError(t, err)
 	require.Equal(t, root, tree.Nodes[0])
 
-	root, err = processProof(tree, leaves[0], proof)
+	root, err = ProcessProof(tree, leaves[0], proof)
 	require.NoError(t, err)
 	require.Equal(t, root, tree.Nodes[0])
 }
@@ -142,15 +142,15 @@ func TestGetProof(t *testing.T) {
 	tree, err := NewMerkeTree(sha3.NewLegacyKeccak256(), leaves)
 	require.NoError(t, err)
 
-	proof, err := getProof(tree, leaves[0])
+	proof, err := GetProof(tree, leaves[0])
 	require.NoError(t, err)
 	fmt.Printf("leaf:%x,\nproof:%x,\nroot:%x\n", leaves[0], proof, tree.Nodes[0])
 
-	root, err := processProof(tree, tree.Nodes[3], proof)
+	root, err := ProcessProof(tree, tree.Nodes[3], proof)
 	require.NoError(t, err)
 	require.Equal(t, root, tree.Nodes[0])
 
-	root, err = processProof(tree, leaves[0], proof)
+	root, err = ProcessProof(tree, leaves[0], proof)
 	require.NoError(t, err)
 	require.Equal(t, root, tree.Nodes[0])
 }
@@ -174,19 +174,19 @@ func TestIsValidMerkleTree(t *testing.T) {
 	tree, err := NewMerkeTree(sha3.NewLegacyKeccak256(), leaves)
 	require.NoError(t, err)
 
-	require.True(t, isValidMerkeTree(tree))
+	require.True(t, IsValidMerkeTree(tree))
 
 	tree = &Tree{}
-	require.False(t, isValidMerkeTree(tree))
+	require.False(t, IsValidMerkeTree(tree))
 
 	tree = &Tree{
 		Nodes: []Node{leaves[0], leaves[1]},
 	}
-	require.False(t, isValidMerkeTree(tree))
+	require.False(t, IsValidMerkeTree(tree))
 
 	tree = &Tree{
 		Hasher: sha3.NewLegacyKeccak256(),
 		Nodes:  []Node{leaves[0], leaves[1], leaves[2]},
 	}
-	require.False(t, isValidMerkeTree(tree))
+	require.False(t, IsValidMerkeTree(tree))
 }

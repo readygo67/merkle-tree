@@ -110,7 +110,7 @@ func NewMerkeTree(hasher hash.Hash, leaves []Node) (*Tree, error) {
 	return tree, nil
 }
 
-func getProofByIndex(tree *Tree, i int) ([]Node, error) {
+func GetProofByIndex(tree *Tree, i int) ([]Node, error) {
 	if !isLeafNode(tree, i) {
 		return nil, errors.New("not a leaf node")
 	}
@@ -124,7 +124,7 @@ func getProofByIndex(tree *Tree, i int) ([]Node, error) {
 	return proof, nil
 }
 
-func getProof(tree *Tree, leaf Node) ([]Node, error) {
+func GetProof(tree *Tree, leaf Node) ([]Node, error) {
 	leafBeginIndex := len(tree.Nodes) / 2
 
 	found := false
@@ -140,10 +140,10 @@ func getProof(tree *Tree, leaf Node) ([]Node, error) {
 		return nil, errors.New("not a leaf node")
 	}
 
-	return getProofByIndex(tree, i)
+	return GetProofByIndex(tree, i)
 }
 
-func processProof(tree *Tree, leaf Node, proof []Node) (Node, error) {
+func ProcessProof(tree *Tree, leaf Node, proof []Node) (Node, error) {
 	if !isValidMerkleNode(leaf) {
 		return nil, errors.New("not a merkle node ")
 	}
@@ -162,7 +162,7 @@ func processProof(tree *Tree, leaf Node, proof []Node) (Node, error) {
 	return node, nil
 }
 
-func isValidMerkeTree(tree *Tree) bool {
+func IsValidMerkeTree(tree *Tree) bool {
 	treeLength := len(tree.Nodes)
 	for i, node := range tree.Nodes {
 		if !isValidMerkleNode(node) {
