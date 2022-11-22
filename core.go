@@ -3,6 +3,7 @@ package merkle_tree
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"hash"
 	"math"
 )
@@ -78,6 +79,9 @@ func isPowerOf2(num int) bool {
 	return num&(num-1) == 0
 }
 
+//NewMerkeTree build a merkle tree
+//@hasher hash algorithm
+//@leaves leaves
 func NewMerkeTree(hasher hash.Hash, leaves []Node) (*Tree, error) {
 	leavesLength := len(leaves)
 	if leavesLength == 0 {
@@ -92,6 +96,10 @@ func NewMerkeTree(hasher hash.Hash, leaves []Node) (*Tree, error) {
 		if !isValidMerkleNode(leaves[i]) {
 			return nil, errors.New("node's byte length is not 32")
 		}
+	}
+
+	if hasher == nil {
+		return nil, errors.New("no hasher")
 	}
 
 	tree := &Tree{
@@ -110,7 +118,9 @@ func NewMerkeTree(hasher hash.Hash, leaves []Node) (*Tree, error) {
 	return tree, nil
 }
 
-func GetProofByIndex(tree *Tree, i int) ([]Node, error) {
+//GetProofByIndex get the proof
+//@i leaf's index
+func (tree *Tree) GetProofByIndex(i int) ([]Node, error) {
 	if !isLeafNode(tree, i) {
 		return nil, errors.New("not a leaf node")
 	}
@@ -124,7 +134,9 @@ func GetProofByIndex(tree *Tree, i int) ([]Node, error) {
 	return proof, nil
 }
 
-func GetProof(tree *Tree, leaf Node) ([]Node, error) {
+//GetProof get the proof
+//@leaf leaf's content
+func (tree *Tree) GetProof(leaf Node) ([]Node, error) {
 	leafBeginIndex := len(tree.Nodes) / 2
 
 	found := false
@@ -140,10 +152,13 @@ func GetProof(tree *Tree, leaf Node) ([]Node, error) {
 		return nil, errors.New("not a leaf node")
 	}
 
-	return GetProofByIndex(tree, i)
+	return tree.GetProofByIndex(i)
 }
 
-func ProcessProof(tree *Tree, leaf Node, proof []Node) (Node, error) {
+//ProcessProof build the root
+//@leaf leaf
+//@proof proof
+func (tree *Tree) ProcessProof(leaf Node, proof []Node) (Node, error) {
 	if !isValidMerkleNode(leaf) {
 		return nil, errors.New("not a merkle node ")
 	}
@@ -162,8 +177,48 @@ func ProcessProof(tree *Tree, leaf Node, proof []Node) (Node, error) {
 	return node, nil
 }
 
-func IsValidMerkeTree(tree *Tree) bool {
+//Verify verify the tree is valid or not
+func (tree *Tree) Verify() bool {
+	return isValidMerkleTree(tree)
+}
+
+func (tree *Tree) Dump() string {
+	if !tree.Verify() {
+		return ""
+	}
+	buff := bytes.Buffer{}
+	for i := 0; i < len(tree.Nodes); i++ {
+		buff.WriteString(fmt.Sprintf("0x%x,", tree.Nodes[i]))
+	}
+	str := buff.String()
+	str = str[:len(str)-1]
+	return str
+}
+
+func (tree *Tree) View() {
+	if !tree.Verify() {
+		return
+	}
+
+	height := int(math.Log2(float64(len(tree.Nodes) + 1)))
+	for i := 0; i < height; i++ {
+		begin := int(math.Pow(float64(2), float64(i))) - 1
+		end := int(math.Pow(float64(2), float64(i+1))) - 1
+		for j := begin; j < end; j++ {
+			fmt.Printf("[0x%x] ", tree.Nodes[i])
+		}
+		fmt.Printf("\n")
+	}
+}
+
+//isValidMerkleTree
+//@tree a merkle tree
+func isValidMerkleTree(tree *Tree) bool {
 	treeLength := len(tree.Nodes)
+	if !isPowerOf2(treeLength + 1) {
+		return false
+	}
+
 	for i, node := range tree.Nodes {
 		if !isValidMerkleNode(node) {
 			return false
