@@ -205,7 +205,7 @@ func (tree *Tree) View() {
 		begin := int(math.Pow(float64(2), float64(i))) - 1
 		end := int(math.Pow(float64(2), float64(i+1))) - 1
 		for j := begin; j < end; j++ {
-			fmt.Printf("[0x%x] ", tree.Nodes[i])
+			fmt.Printf("[0x%x] ", tree.Nodes[j])
 		}
 		fmt.Printf("\n")
 	}
